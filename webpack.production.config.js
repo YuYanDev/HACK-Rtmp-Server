@@ -8,13 +8,7 @@ var config = {
   entry: ["babel-polyfill", "./frontend/index.js"],
   output: {
     path: path.resolve(__dirname, 'public/static/js'),
-    filename: 'main.[chunkhash:16].js'
-  },
-  resolve: {
-    alias: {
-      React: "react/dist/react.min.js",
-      ReactDOM: "react-dom/dist/react-dom.min.js"
-    }
+    filename: 'live.[chunkhash:16].js'
   },
   module: {
     loaders: [
@@ -41,7 +35,7 @@ var config = {
       },
       { 
         test: /\.css$/, // Only .css files
-        exclude: /node_modules/,
+        include: /node_modules/,
         loader: [ 'style-loader', 'css-loader' ] // Run both loaders
       }
     ]

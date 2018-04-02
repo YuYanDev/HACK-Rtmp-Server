@@ -5,11 +5,31 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
 var debug = require('debug')('express-blog-hexo:server');
 
 var NodeMediaServer = require('node-media-server');
+const config = {
+  rtmp: {
+    port: 1935,
+    chunk_size: 60000,
+    gop_cache: true,
+    ping: 60,
+    ping_timeout: 30
+  },
+  http: {
+    port: 8000,
+    allow_origin: '*'
+  }
+  // ,
+  // auth: {
+  //   play: true,
+  //   publish: true,
+  //   secret: '121'
+  // }
+}
+
+var nms = new NodeMediaServer(config)
+nms.run();
 
 function onListening() {
   var addr = server.address();
@@ -50,10 +70,7 @@ var app = express();
 app.locals.env = process.env.NODE_ENV || 'production';
 
 var index = require('./routes/index');
-var apis = require('./api/apis');
-var auth = require('./routes/auth');
-var admin = require('./routes/admin')
-
+var lives = require('./routes/lives')
 var appPort = '3000'
 app.set('port', appPort);
 // view engine setup
@@ -67,33 +84,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-var identityKey = 'YuYanSession';
-app.use(session({
-  name: identityKey,
-	secret: 'secret',  // 用来对session id相关的cookie进行签名
-	store: new FileStore(),  // 本地存储session（文本文件，也可以选择其他store，比如redis的）
-	saveUninitialized: false,  // 是否自动保存未初始化的会话，建议false
-	resave: false,  // 是否每次都重新保存会话，建议false
-	cookie: {
-		maxAge: 2 * 12 * 60 * 60 * 1000  // 有效期，单位是毫秒
-	}
-}));
 
 
 app.use('/', index);
-app.use('/api',apis);
-app.use('/auth',auth);
-app.use('/admin',admin);
-app.use('/sitemap.xml',function(req,res,next){
-  res.sendFile(path.resolve('hexo/public/sitemap.xml' ))
-});
-app.use('/atom.xml',function(req,res,next){
-  res.sendFile(path.resolve('hexo/public/atom.xml' ))
-});
-app.use('/google7fa757a5db2904c7.html',function(req,res,next){
-  res.sendFile(path.resolve('views/google7fa757a5db2904c7.html' ))
-});
-
+app.use('/live', lives);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

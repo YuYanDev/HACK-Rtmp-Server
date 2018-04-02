@@ -6,8 +6,6 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
 var debug = require('debug')('express-blog-hexo:server');
 
 // var dl = require('./jsondata/bilibangumidata');
@@ -81,9 +79,6 @@ function onError(error) {
 var app = express();
 
 var index = require('./routes/index');
-var apis = require('./api/apis');
-var auth = require('./routes/auth');
-var admin = require('./routes/admin')
 var lives = require('./routes/lives')
 var appPort = '3000'
 app.set('port', appPort);
@@ -113,23 +108,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-var identityKey = 'YuYanSession';
-app.use(session({
-  name: identityKey,
-	secret: 'secret',  // 用来对session id相关的cookie进行签名
-	store: new FileStore(),  // 本地存储session（文本文件，也可以选择其他store，比如redis的）
-	saveUninitialized: false,  // 是否自动保存未初始化的会话，建议false
-	resave: false,  // 是否每次都重新保存会话，建议false
-	cookie: {
-		maxAge: 1000 * 1000  // 有效期，单位是毫秒
-	}
-}));
 
 app.use('/', index);
 app.use('/live', lives);
-app.use('/api',apis);
-app.use('/auth',auth);
-app.use('/admin',admin)
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

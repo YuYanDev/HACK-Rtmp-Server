@@ -1,185 +1,54 @@
-// require('es5-shim');
-// require('es5-shim/es5-sham');
+// require('es5-shim'); require('es5-shim/es5-sham');
 // require('console-polyfill');
-import React from 'react';
-import ReactDOM from 'react-dom';
-import "isomorphic-fetch";
-import "babel-polyfill";
-import './compoment/bulma.min.css';
-import './compoment/github-markdown.css';
+import flvjs from 'flv.js';
+import css from 'materialize-css/dist/css/materialize.css';
+
+var urldomain = document.domain;
+var videoViewWidth = document.body.clientWidth*0.6;
+var videoTemplate = `<center><video width="`+videoViewWidth+`" controls="controls"poster="/img/black.jpg" id="videoElement"></video></center>`
+
+var defautTemplate = `<nav style="background-color: #5b32b4 !important;" role="navigation">
+  <div class="nav-wrapper container">
+    <a id="logo-container" href="/" class="brand-logo">萌直播</a>
+    <ul class="right hide-on-med-and-down">
+      <li><a href="/#download">立即下载</a></li>
+    </ul>
+  </div>
+</nav>
 
 
+<div class="container">
+<div class="section">
 
-/**
- * 一言
- */
-class Hitokoto extends React.Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      hitokotoText: '',
-      hitokotoCatName: ''
-    };
-  }
-  componentDidMount() {
-    async function fetchAsyncPageMarkdown () {
-      let response = await fetch(`/api/hitokoto/`);
-      
-      let data = await response.json();
-      return data;
-    }
-    
-    fetchAsyncPageMarkdown()
-    .then(data => {
-      this.setState({
-        hitokotoText: data.hitokoto,
-        hitokotoCatName: data.catname
-        });
-      }
-    )
-    .catch(function (reason) {
-      return console.log(reason.message);
-    });
-
-  }
-
-  render() {
-    return (
-      <div>
-        <h1>
-        一言: 
-        {this.state.hitokotoText}
-        </h1>
-        <h5>{this.state.hitokotoCatName}</h5>
+<div class="row">
+    <div class="col s12 m12">
+      <div class="card">
+      <br/>
+        `+ videoTemplate +`
+        <br/>
       </div>
-    );
-  }
+    </div>
+  </div>
+
+</div>
+<br><br>
+</div>
+
+
+`
+
+document.getElementById("app").innerHTML = defautTemplate;
+
+if (flvjs.isSupported()) {
+  var videoElement = document.getElementById('videoElement');
+  var flvPlayer = flvjs.createPlayer({
+      type: 'flv',
+      url: 'http://'+urldomain+':8000/live/stream.flv'
+  });
+  flvPlayer.attachMediaElement(videoElement);
+  flvPlayer.load();
+  flvPlayer.play();
 }
 
 
-/**
- * 首屏渲染
- */
-class IndexPage extends React.Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      loginStatus: false,
-      blilibiliBangumi:''
-    };
-  }
-  componentDidMount() {
-    async function fetchAsyncloginStatus () {
-      let response = await fetch(`/auth/islogin`,{credentials: 'include'});
-      
-      let data = await response.json();
-      return data;
-    }
-    
-    fetchAsyncloginStatus()
-    .then(data => {
-      this.setState({
-        loginStatus: data.ret_login_status
-        });
-      }
-    )
-    .catch(function (reason) {
-      return console.log(reason.message);
-    });
-  }
-  
-  render(){
-    return(
-      <div>
-      <section className="hero is-primary">
-        
-        <div className="hero-head">
-          <nav className="navbar">
-            <div className="container">
-              <div className="navbar-brand">
-                <a className="navbar-item">
-                  首页
-                </a>
-                <a className="navbar-item">
-                  文章
-                </a>
-                <span className="navbar-burger burger" data-target="navbarMenuHeroA">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </span>
-              </div>
-              <div id="navbarMenuHeroA" className="navbar-menu">
-                <div className="navbar-end">
-                  <span className="navbar-item">
-                  {this.state.loginStatus ? (
-                      <a className="button is-primary is-inverted" href="/admin">
-                      <span className="icon">
-                      <i className="fa fa-terminal" aria-hidden="true"></i>
-                      </span>
-                      <span>控制台</span>
-                      </a>
-                    ) : (
-                      <a className="button is-primary is-inverted" href="/auth/login">
-                      <span className="icon">
-                      <i className="fa fa-sign-in" aria-hidden="true"></i>
-                      </span>
-                      <span>登录</span>
-                      </a>
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </nav>
-        </div>
-      
-        
-        <div className="hero-body">
-          <div className="container has-text-centered">
-            <h1 className="title">
-              宅日记
-            </h1>
-          </div>
-        </div>
-      
-       
-        <div className="hero-foot">
-          <nav className="tabs">
-            <div className="container">
-              <ul>
-                <li className="is-active"><a>动漫</a></li>
-              </ul>
-            </div>
-          </nav>
-        </div>
-      </section>
-      
-      <section className="section is-medium">
-          <div className="container">
-            <div >
-              
-                { Object.entries(this.state.blilibiliBangumi).map(function(item,index){
-                  var items = JSON.parse(JSON.stringify(item.slice(1)).substring(1,JSON.stringify(item.slice(1)).length-1));
-                  return(
-                    <div key={index}>
-                    </div>
-                  )
-                })}
-              
-            </div>
-          </div>
-        </section>
-    
-      
-    
-    
-    
-      </div>
-    )
-  }
-}
-
-
-
-  ReactDOM.render(<IndexPage/>, document.getElementById('app'));
+// export { $,materialize };

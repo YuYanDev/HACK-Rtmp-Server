@@ -7,7 +7,7 @@ router.use(useragent.express());
 
 router.get('/',function(req,res,next){
 
-    res.sendFile(path.resolve('views/x.html' ));
+    res.sendFile(path.resolve('views/live.html' ));
 
 })
 
